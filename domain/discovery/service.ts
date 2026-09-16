@@ -35,4 +35,19 @@ export async function addEntity(projectId:string,type:keyof typeof tables,input:
 export async function addSource(projectId:string,input:unknown){const d=evidenceSourceSchema.parse(input);const r=await db`INSERT INTO evidence_sources(project_id,title,source_type,source_url,publisher,metadata) VALUES(${projectId},${d.title},${d.sourceType??null},${d.sourceUrl??null},${d.publisher??null},${d.metadata?JSON.stringify(d.metadata):null}) RETURNING *`;return r[0];}
 export async function addEvidence(projectId:string,input:unknown){const d=evidenceSchema.parse(input);const r=await db`INSERT INTO evidence(project_id,source_id,claim,status,confidence,excerpt,locator) VALUES(${projectId},${d.sourceId??null},${d.claim},${d.status},${d.confidence??null},${d.excerpt??null},${d.locator??null}) RETURNING *`;return r[0];}
 export async function verifyEvidence(projectId:string,evidenceId:string,input:unknown){const d=humanVerificationSchema.parse(input);const e=await db`SELECT id FROM evidence WHERE id=${evidenceId} AND project_id=${projectId}`;if(!e[0])throw new Error("Evidence not found");const r=await db`INSERT INTO evidence_verifications(evidence_id,reviewer,decision,rationale) VALUES(${evidenceId},${d.reviewer},${d.decision},${d.rationale??null}) RETURNING *`;if(d.decision==="ACCEPT")await db`UPDATE evidence SET status='VERIFIED' WHERE id=${evidenceId}`;await db`INSERT INTO human_reviews(project_id,target_type,target_id,reviewer,decision,rationale) VALUES(${projectId},'EVIDENCE',${evidenceId},${d.reviewer},${d.decision},${d.rationale??null})`;return r[0];}
-export async function reviewGate(projectId:string,gateNumber:number,input:unknown){const d=gateReviewSchema.parse(input);const g=await db`SELECT * FROM project_gates WHERE project_id=${projectId} AND gate_number=${gateNumber}`;if(!g[0])throw new Error("Gate not found");const r=await db`INSERT INTO gate_reviews(gate_id,reviewer,status,rationale) VALUES(${g[0].id},${d.reviewer},${d.status},${d.rationale??null}) RETURNING *`;await db`UPDATE project_gates SET status=${d.status} WHERE id=${g[0].id}`;if(d.status==="ADVANCE"){const next=gateNumber+1;if(next<stages.length)await db`UPDATE projects SET current_stage=${stages[next]},status=${statuses[next]} WHERE id=${projectId}`;else await db`UPDATE projects SET current_stage='SPECIFICATION',status='SPECIFICATION' WHERE id=${projectId}`;}return r[0];}
+export async function reviewGate(projectId:string,gateNumber:number,input:unknown){
+ const d=gateReviewSchema.parse(input); const g=await db`SELECT * FROM project_gates WHERE project_id=${projectId} AND gate_number=${gateNumber}`; if(!g[0])throw new Error("Gate not found");
+ const r=await db`INSERT INTO gate_reviews(gate_id,reviewer,status,rationale) VALUES(${g[0].id},${d.reviewer},${d.status},${d.rationale??null}) RETURNING *`;
+ await db`UPDATE project_gates SET status=${d.status} WHERE id=${g[0].id}`;
+ if(d.status==="ADVANCE"){
+   const next=gateNumber+1;
+   if(next<stages.length){
+     await db`UPDATE projects SET current_stage=${stages[next]},status=${statuses[next]} WHERE id=${projectId}`;
+     await db`UPDATE project_gates SET status='READY' WHERE project_id=${projectId} AND gate_number=${next}`;
+   }else{
+     await db`UPDATE projects SET current_stage='SPECIFICATION',status='SPECIFICATION' WHERE id=${projectId}`;
+   }
+ }
+ await db`INSERT INTO audit_trail(project_id,actor,action,entity_type,entity_id,payload) VALUES(${projectId},${d.reviewer},'GATE_REVIEWED','project_gate',${g[0].id},${JSON.stringify({gateNumber,status:d.status})})`;
+ return r[0];
+}
