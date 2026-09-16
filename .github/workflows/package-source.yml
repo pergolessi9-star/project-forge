@@ -11,10 +11,10 @@ jobs:
       - name: Create source archive
         run: |
           rm -rf .git
-          zip -qr ../PROJECT-FORGE-Discovery-Command-Center-v0.1.1.zip . -x 'node_modules/*' '.next/*'
+          zip -qr PROJECT-FORGE-Discovery-Command-Center-v0.1.1.zip . -x 'node_modules/*' '.next/*'
       - name: Upload archive
         uses: actions/upload-artifact@v4
         with:
           name: PROJECT-FORGE-Discovery-Command-Center-v0.1.1
-          path: ../PROJECT-FORGE-Discovery-Command-Center-v0.1.1.zip
+          path: PROJECT-FORGE-Discovery-Command-Center-v0.1.1.zip
           if-no-files-found: error
