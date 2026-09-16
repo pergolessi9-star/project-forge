@@ -1,0 +1,9 @@
+import { getDiscovery } from "@/domain/discovery/service";
+
+export const dynamic="force-dynamic";
+export default async function ProjectDiscovery({params}:{params:{id:string}}){
+ const d=await getDiscovery(params.id);
+ if(!d.project)return <main className="main"><h1>Project not found</h1></main>;
+ const sections=[['PROBLEM',d.problem],['MARKET',[...d.customer,...d.market,...d.competitor]],['TECHNOLOGY',d.technology],['REGULATION',d.regulation],['EVIDENCE',d.evidence]] as const;
+ return <div className="shell"><header className="topbar"><div className="brand">PROJECT FORGE</div><div className="version">DISCOVERY ENGINE</div></header><main className="main"><section className="hero"><div><div className="eyebrow">{d.project.code}</div><h1>{d.project.name}</h1><p className="subtitle">{d.project.description??'Evidence-first discovery workspace.'}</p></div><div className="badge">{d.project.current_stage}</div></section><section className="section"><h2>Discovery sequence</h2><div className="pipeline">{['INTAKE','PROBLEM','MARKET','TECHNOLOGY','REGULATION','EVIDENCE','CONCEPT','MVP','VALIDATION','SPECIFICATION'].map(s=><div className="stage" key={s}><strong>{s}</strong><small>{s===d.project.current_stage?'CURRENT':'READY'}</small></div>)}</div></section>{sections.map(([name,items])=><section className="section" key={name}><h2>{name}</h2><div className="card"><strong>{items.length}</strong><span className="subtitle"> records</span></div></section>)}<section className="section"><h2>Gates</h2><table className="table"><thead><tr><th>#</th><th>Gate</th><th>Stage</th><th>Status</th></tr></thead><tbody>{d.gates.map((g:any)=><tr key={g.id}><td>{g.gate_number}</td><td>{g.gate_code}</td><td>{g.stage}</td><td><span className="badge">{g.status}</span></td></tr>)}</tbody></table></section></main></div>;
+}
