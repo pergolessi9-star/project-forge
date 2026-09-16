@@ -1,18 +1,11 @@
-import { pgEnum, pgTable, uuid, text, numeric, timestamptz, integer } from "drizzle-orm/pg-core";
-
-export const evidenceStatus = pgEnum("evidence_status", ["VERIFIED","DERIVED","DECLARED","SCENARIO","PENDING"]);
-export const projectStatus = pgEnum("project_status", ["IDEA","DISCOVERY","EVIDENCE_REVIEW","CONCEPT","MVP","VALIDATION","SPECIFICATION","ENGINEERING","ARCHIVED","REJECTED"]);
-export const projectStage = pgEnum("project_stage", ["INTAKE","PROBLEM","MARKET","TECHNOLOGY","REGULATION","EVIDENCE","CONCEPT","MVP","VALIDATION","SPECIFICATION"]);
-export const gateStatus = pgEnum("gate_status", ["PENDING","READY","ADVANCE","HOLD","REWORK","REJECT"]);
-
-export const projects = pgTable("projects", {
-  id: uuid("id").primaryKey().defaultRandom(), code: text("code").notNull().unique(), name: text("name").notNull(), description: text("description"),
-  status: projectStatus("status").notNull().default("IDEA"), currentStage: projectStage("current_stage").notNull().default("INTAKE"), owner: text("owner"), confidence: numeric("confidence", {precision:5,scale:2}),
-  createdAt: timestamptz("created_at").notNull().defaultNow(), updatedAt: timestamptz("updated_at").notNull().defaultNow()
-});
-export const evidence = pgTable("evidence", {
-  id: uuid("id").primaryKey().defaultRandom(), projectId: uuid("project_id").notNull(), sourceId: uuid("source_id"), claim: text("claim").notNull(), status: evidenceStatus("status").notNull().default("PENDING"), confidence: numeric("confidence", {precision:5,scale:2}), excerpt: text("excerpt"), locator: text("locator"), createdAt: timestamptz("created_at").notNull().defaultNow()
-});
-export const evidenceSources = pgTable("evidence_sources", { id: uuid("id").primaryKey().defaultRandom(), projectId: uuid("project_id").notNull(), title: text("title").notNull(), sourceType: text("source_type"), sourceUrl: text("source_url"), publisher: text("publisher"), retrievedAt: timestamptz("retrieved_at") });
-export const humanReviews = pgTable("human_reviews", { id: uuid("id").primaryKey().defaultRandom(), projectId: uuid("project_id").notNull(), targetType: text("target_type").notNull(), targetId: uuid("target_id").notNull(), reviewer: text("reviewer").notNull(), decision: text("decision").notNull(), rationale: text("rationale"), reviewedAt: timestamptz("reviewed_at").notNull().defaultNow() });
-export const projectGates = pgTable("project_gates", { id: uuid("id").primaryKey().defaultRandom(), projectId: uuid("project_id").notNull(), gateNumber: integer("gate_number").notNull(), gateCode: text("gate_code").notNull(), stage: projectStage("stage").notNull(), status: gateStatus("status").notNull().default("PENDING") });
+import { pgEnum, pgTable, uuid, text, numeric, timestamp, integer } from "drizzle-orm/pg-core";
+export const evidenceStatus=pgEnum("evidence_status",["VERIFIED","DERIVED","DECLARED","SCENARIO","PENDING"]);
+export const projectStatus=pgEnum("project_status",["IDEA","DISCOVERY","EVIDENCE_REVIEW","CONCEPT","MVP","VALIDATION","SPECIFICATION","ENGINEERING","ARCHIVED","REJECTED"]);
+export const projectStage=pgEnum("project_stage",["INTAKE","PROBLEM","MARKET","TECHNOLOGY","REGULATION","EVIDENCE","CONCEPT","MVP","VALIDATION","SPECIFICATION"]);
+export const gateStatus=pgEnum("gate_status",["PENDING","READY","ADVANCE","HOLD","REWORK","REJECT"]);
+const ts=(name:string)=>timestamp(name,{withTimezone:true});
+export const projects=pgTable("projects",{id:uuid("id").primaryKey().defaultRandom(),code:text("code").notNull().unique(),name:text("name").notNull(),description:text("description"),status:projectStatus("status").notNull().default("IDEA"),currentStage:projectStage("current_stage").notNull().default("INTAKE"),owner:text("owner"),confidence:numeric("confidence",{precision:5,scale:2}),createdAt:ts("created_at").notNull().defaultNow(),updatedAt:ts("updated_at").notNull().defaultNow()});
+export const evidence=pgTable("evidence",{id:uuid("id").primaryKey().defaultRandom(),projectId:uuid("project_id").notNull(),sourceId:uuid("source_id"),claim:text("claim").notNull(),status:evidenceStatus("status").notNull().default("PENDING"),confidence:numeric("confidence",{precision:5,scale:2}),excerpt:text("excerpt"),locator:text("locator"),createdAt:ts("created_at").notNull().defaultNow()});
+export const evidenceSources=pgTable("evidence_sources",{id:uuid("id").primaryKey().defaultRandom(),projectId:uuid("project_id").notNull(),title:text("title").notNull(),sourceType:text("source_type"),sourceUrl:text("source_url"),publisher:text("publisher"),retrievedAt:ts("retrieved_at")});
+export const humanReviews=pgTable("human_reviews",{id:uuid("id").primaryKey().defaultRandom(),projectId:uuid("project_id").notNull(),targetType:text("target_type").notNull(),targetId:uuid("target_id").notNull(),reviewer:text("reviewer").notNull(),decision:text("decision").notNull(),rationale:text("rationale"),reviewedAt:ts("reviewed_at").notNull().defaultNow()});
+export const projectGates=pgTable("project_gates",{id:uuid("id").primaryKey().defaultRandom(),projectId:uuid("project_id").notNull(),gateNumber:integer("gate_number").notNull(),gateCode:text("gate_code").notNull(),stage:projectStage("stage").notNull(),status:gateStatus("status").notNull().default("PENDING")});
