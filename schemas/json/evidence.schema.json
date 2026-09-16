@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project-forge/evidence.schema.json",
+  "type": "object",
+  "required": ["projectId","evidenceCode","claim","evidenceType","status"],
+  "properties": {
+    "projectId": {"type": "string", "format": "uuid"},
+    "evidenceCode": {"type": "string"},
+    "claim": {"type": "string"},
+    "evidenceType": {"enum": ["VERIFIED","DERIVED","DECLARED","SCENARIO","PENDING"]},
+    "confidence": {"type": "string"},
+    "status": {"enum": ["PENDING","UNDER_REVIEW","VERIFIED","REJECTED"]},
+    "sourceId": {"type": "string", "format": "uuid"},
+    "extractedText": {"type": "string"},
+    "structuredData": {"type": "object"}
+  }
+}

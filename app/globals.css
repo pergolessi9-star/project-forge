@@ -1,0 +1,27 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #f4f6f8; color: #16202a; font-family: Arial, sans-serif; }
+a { color: inherit; text-decoration: none; }
+.shell { min-height: 100vh; }
+.topbar { height: 64px; background: #101820; color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+.brand { font-weight: 800; letter-spacing: .08em; }
+.version { opacity: .65; font-size: 12px; }
+.main { padding: 32px; max-width: 1400px; margin: auto; }
+.hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 28px; }
+.eyebrow { text-transform: uppercase; font-size: 12px; letter-spacing: .14em; color: #5d6b76; font-weight: 700; }
+h1 { font-size: 38px; margin: 8px 0; }
+.subtitle { color: #5d6b76; max-width: 700px; line-height: 1.5; }
+.button { background: #101820; color: white; border: 0; border-radius: 8px; padding: 12px 18px; font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.card { background: white; border: 1px solid #dce2e7; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.metric { font-size: 30px; font-weight: 800; margin-top: 8px; }
+.label { color: #687681; font-size: 13px; }
+.section { margin-top: 28px; }
+.section h2 { font-size: 20px; }
+.pipeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.stage { padding: 14px; background: white; border: 1px solid #dce2e7; border-radius: 10px; }
+.stage.active { border-color: #101820; }
+.stage small { display: block; color: #687681; margin-top: 6px; }
+.table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+.table th, .table td { text-align: left; padding: 14px; border-bottom: 1px solid #edf0f2; font-size: 14px; }
+.badge { display: inline-block; border-radius: 999px; padding: 5px 9px; font-size: 11px; font-weight: 700; background: #edf1f4; }
+@media(max-width: 900px) { .grid, .pipeline { grid-template-columns: 1fr 1fr; } .hero { align-items: flex-start; flex-direction: column; } }
