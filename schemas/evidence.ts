@@ -1,13 +1,4 @@
 import { z } from "zod";
-export const evidenceTypeSchema = z.enum(["VERIFIED","DERIVED","DECLARED","SCENARIO","PENDING"]);
-export const evidenceStatusSchema = z.enum(["PENDING","VERIFIED","REJECTED"]);
-export const evidenceSchema = z.object({
-  projectId: z.string().uuid(),
-  claim: z.string().min(1),
-  status: evidenceTypeSchema,
-  confidence: z.number().min(0).max(1).optional(),
-  sourceId: z.string().uuid().optional(),
-  excerpt: z.string().optional(),
-  locator: z.string().optional()
-});
-export type EvidenceInput = z.infer<typeof evidenceSchema>;
+export const evidenceStatusSchema=z.enum(["VERIFIED","DERIVED","DECLARED","SCENARIO","PENDING"]);
+export const evidenceSchema=z.object({projectId:z.string().uuid(),sourceId:z.string().uuid().optional(),claim:z.string().trim().min(1),status:evidenceStatusSchema.default("PENDING"),confidence:z.number().min(0).max(100).optional(),excerpt:z.string().optional(),locator:z.string().optional()});
+export type EvidenceInput=z.infer<typeof evidenceSchema>;
