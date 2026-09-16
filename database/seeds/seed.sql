@@ -1,25 +1,4 @@
-INSERT INTO projects (code, name, description, status, current_stage)
-VALUES ('PF-0001','Project Forge Demonstrator','Seed project demonstrating the evidence-first discovery workflow.','DISCOVERY','EVIDENCE');
-
-INSERT INTO project_ideas (project_id, statement)
-SELECT id,'A platform that transforms early project ideas into evidence-backed concepts before engineering begins.'
-FROM projects WHERE code='PF-0001';
-
-INSERT INTO project_gates (project_id, gate_number, gate_code, stage, status)
-SELECT id,n,t,s,CASE WHEN n=1 THEN 'READY' ELSE 'PENDING' END
-FROM projects,
-LATERAL (VALUES
- (0,'INTAKE','INTAKE'),(1,'PROBLEM_EVIDENCE','PROBLEM'),(2,'MARKET_EVIDENCE','MARKET'),
- (3,'TECHNOLOGY_FEASIBILITY','TECHNOLOGY'),(4,'REGULATORY_FEASIBILITY','REGULATION'),
- (5,'CONCEPT','CONCEPT'),(6,'MVP','MVP'),(7,'VALIDATION','VALIDATION'),(8,'SPECIFICATION','SPECIFICATION')
-) AS gates(n,t,s)
-WHERE code='PF-0001';
-
-INSERT INTO evidence_sources (project_id, title, source_type, publisher)
-SELECT id,'PROJECT FORGE foundation specification','INTERNAL','PROJECT FORGE'
-FROM projects WHERE code='PF-0001';
-
-INSERT INTO evidence (project_id, claim, status, confidence, source_id)
-SELECT p.id,'PROJECT FORGE separates discovery from engineering and requires evidence and human verification before product handoff.','DECLARED',0.90,s.id
-FROM projects p JOIN evidence_sources s ON s.project_id=p.id
-WHERE p.code='PF-0001';
+INSERT INTO projects (code,name,description,status,current_stage,owner,confidence) VALUES ('PF-0001','Project Forge Demonstrator','Seed project demonstrating the evidence-first discovery workflow.','DISCOVERY','EVIDENCE','PROJECT FORGE',82) ON CONFLICT(code) DO NOTHING;
+INSERT INTO evidence_sources(project_id,title,source_type,publisher) SELECT id,'PROJECT FORGE foundation specification','INTERNAL','PROJECT FORGE' FROM projects WHERE code='PF-0001' AND NOT EXISTS(SELECT 1 FROM evidence_sources s WHERE s.project_id=projects.id AND s.title='PROJECT FORGE foundation specification');
+INSERT INTO evidence(project_id,source_id,claim,status,confidence) SELECT p.id,s.id,'PROJECT FORGE separates discovery from engineering and requires evidence and human verification before product handoff.','DECLARED',95 FROM projects p JOIN evidence_sources s ON s.project_id=p.id AND s.title='PROJECT FORGE foundation specification' WHERE p.code='PF-0001' AND NOT EXISTS(SELECT 1 FROM evidence e WHERE e.project_id=p.id AND e.claim LIKE 'PROJECT FORGE separates discovery%');
+INSERT INTO project_gates(project_id,gate_number,gate_code,stage,status) SELECT p.id,g.n,g.code,g.stage,CASE WHEN g.n=0 THEN 'READY'::gate_status ELSE 'PENDING'::gate_status END FROM projects p CROSS JOIN(VALUES(0,'INTAKE','INTAKE'),(1,'PROBLEM_EVIDENCE','PROBLEM'),(2,'MARKET_EVIDENCE','MARKET'),(3,'TECHNOLOGY_FEASIBILITY','TECHNOLOGY'),(4,'REGULATORY_FEASIBILITY','REGULATION'),(5,'CONCEPT','CONCEPT'),(6,'MVP','MVP'),(7,'VALIDATION','VALIDATION'),(8,'SPECIFICATION','SPECIFICATION'))g(n,code,stage) WHERE p.code='PF-0001' ON CONFLICT(project_id,gate_number) DO NOTHING;
