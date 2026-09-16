@@ -8,9 +8,9 @@ export async function createResearchRun(projectId:string,input:unknown){
  const r=await db`INSERT INTO research_runs(project_id,agent_type,query,status) VALUES(${projectId},${d.agentType},${d.query},'QUEUED') RETURNING *`;
  return r[0];
 }
-
-export async function listResearchRuns(projectId:string){return db`SELECT * FROM research_runs WHERE project_id=${projectId} ORDER BY created_at DESC`}
-
+export async function listResearchRuns(projectId:string){
+ return db`SELECT r.*,COALESCE(json_agg(f ORDER BY f.created_at DESC) FILTER (WHERE f.id IS NOT NULL),'[]'::json) AS findings FROM research_runs r LEFT JOIN research_findings f ON f.research_run_id=r.id WHERE r.project_id=${projectId} GROUP BY r.id ORDER BY r.created_at DESC`;
+}
 export async function saveResearchResult(projectId:string,runId:string,input:unknown){
  const d=researchFindingSchema.parse(input);
  const run=await db`SELECT id FROM research_runs WHERE id=${runId} AND project_id=${projectId}`;
